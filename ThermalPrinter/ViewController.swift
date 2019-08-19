@@ -25,11 +25,25 @@ class ViewController: NSViewController, ORSSerialPortDelegate {
         
         printer.serialPort.delegate = self
         textView.string = UserDefaults.standard.string(forKey: "lastText") ?? ""
+        let imageURL = Bundle.main.url(forResource: "test", withExtension: "bmp")!
         
+        let data = try! Data(contentsOf: imageURL)
+        
+        print(data[1...100])
+        
+        let scalar = UnicodeScalar(data[1])
+        
+        printer.print(String(scalar))
+        
+//        printer.printBitmap(bitmap: macIconData, width: 229, height: 225)
+        
+        
+        printer.reset()
         printer.resetToDefaults()
+//        printer.printBitmap(bitmap: data, width: 200, height: 200, lineAtATime: false)
     }
     
-    @IBAction func print(_ sender: Any) {
+    @IBAction func printWrittenText(_ sender: Any) {
         
         var printText: String = ""
         

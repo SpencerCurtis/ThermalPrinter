@@ -831,7 +831,7 @@
                                                     <font key="font" metaFont="system"/>
                                                 </buttonCell>
                                                 <connections>
-                                                    <action selector="print:" target="XfG-lQ-9wD" id="TfK-Iy-rVa"/>
+                                                    <action selector="printWrittenText:" target="XfG-lQ-9wD" id="2oz-sa-T5y"/>
                                                 </connections>
                                             </button>
                                         </subviews>

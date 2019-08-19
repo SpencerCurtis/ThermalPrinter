@@ -25,7 +25,7 @@ class Printer {
     var charHeight: UInt8 = 24
     var lineSpacing: UInt8 = 8
     var barcodeHeight: UInt8 = 50
-    var defaultHeatTime: UInt8 = 120 // 3-255 Heating time, Unit (10us), Default: 80 (800us)
+    var defaultHeatTime: UInt8 = 255 // 3-255 Heating time, Unit (10us), Default: 80 (800us)
     var firmwareVersion =   268
     var writeToStdout = false
     var printMode: UInt8 = 0 {
@@ -227,15 +227,26 @@ class Printer {
         
         let data = Data(bytes: &numbers, count: MemoryLayout.size(ofValue: numbers))
         
-        write(data: data)
+        serialPort.open()
+        serialPort.send(data)
+        serialPort.close()
     }
     
     func printBitmap() {
-        let imageURL = Bundle.main.url(forResource: "macIcon", withExtension: "jpg")!
-        
+        let imageURL = Bundle.main.url(forResource: "test", withExtension: "bmp")!
+    
         let data = try! Data(contentsOf: imageURL)
         
-        write(data: data)
+        var string = ""
+        
+        for i in data {
+            let scalar = String(UnicodeScalar(i))
+            string += scalar
+        }
+        
+        let stringData = string.data(using: .utf8)!
+        
+        writeTextData(stringData)
     }
     
     
@@ -257,7 +268,9 @@ class Printer {
     
     func print(_ text: String) {
         let data = text.data(using: .utf8)!
-        write(data: data)
+        serialPort.open()
+        serialPort.send(data)
+        serialPort.close()
     }
     
     enum Justification: UInt8 {
@@ -282,11 +295,121 @@ class Printer {
         write(bytes: 12)
     }
     
+    enum Size {
+        case normal
+        case medium
+        case large
+    }
+    
+    func setSize(_ size: Size) {
+        
+        let newSize: UInt8
+        
+        switch size {
+        case .normal:
+            newSize = 0x00
+            charHeight = 24
+            maxColumn = 32
+        case .medium:
+            newSize = 0x01
+            charHeight = 48
+            maxColumn = 32
+        case .large:
+            newSize = 0x11
+            charHeight = 24
+            maxColumn = 32
+        }
+        write(bytes: 29, 33, newSize)
+        prevByte = "\n"
+    }
     
     
-    private func write(data: Data) {
+    func printBitmap(bitmap: Data, width: UInt8, height: UInt8, lineAtATime: Bool = false) {
+        
+        let rowBytes: UInt8 = (width + 7) / 8
+            
+        let rowBytesClipped = min(48, rowBytes)
+        
+        let maxChunkHeight: UInt8 = lineAtATime ? 1 : 255
+        
+        for rowStart in stride(from: 0, to: height, by: Int(maxChunkHeight)) {
+            
+            var chunkHeight: UInt8 = UInt8(height - rowStart)
+            
+            chunkHeight = min(chunkHeight, maxChunkHeight)
+            write(bytes: 18, 42, chunkHeight, rowBytesClipped)
+            
+            var i: Int = 0
+            for y in 0...chunkHeight {
+                for x in 0...rowBytesClipped {
+                    
+                    if writeToStdout {
+
+                    } else {
+                        var character = bitmap[Int(y) * Int(x)]
+                        Swift.print(character)
+                        writeBitmapData(Data(bytes: &character, count: MemoryLayout<UInt8>.size))
+                    }
+                    
+                    i += 1
+                }
+                Swift.print("\(Int(rowBytes) - Int(rowBytesClipped))")
+                i += Int(rowBytes) - Int(rowBytesClipped)
+            }
+            setTimeout(seconds: Double(chunkHeight) * dotFeedTime)
+        }
+        
+        prevByte = "\n"
+        
+    }
+    
+    func timeoutWait() {
+        if !writeToStdout {
+            while Date().timeIntervalSince1970 - resumeTime < 0 {
+                print("\(Date().timeIntervalSince1970 - resumeTime) seconds left to wait")
+            }
+        }
+    }
+    private func writeTextData(_ textData: Data) {
         serialPort.open()
-        serialPort.send(data)
+        serialPort.send(textData)
+        serialPort.close()
+    }
+    
+    private func writeBitmapData(_ data: Data) {
+        serialPort.open()
+        
+        for i in 0..<data.count {
+            var character = data[i]
+            
+            var timeout = byteTime
+            if character != 0x13 {
+                
+//                timeoutWait()
+                serialPort.send(data)
+                
+                let characterString = String(UnicodeScalar(character))
+                
+                if characterString == "\n" || column == maxColumn {
+                    // Blank Line
+                    timeout += Double((charHeight + lineSpacing)) * dotFeedTime
+                } else {
+                    // Text Line
+                    timeout += (Double(charHeight) + dotPrintTime)
+                        + (Double(lineSpacing)  * dotFeedTime)
+                    column = 0
+                    
+                    character = 0x0a
+                }
+            } else {
+                column += 1
+            }
+            setTimeout(seconds: timeout)
+            prevByte = String(UnicodeScalar(character))
+        }
+        
+        
+//        serialPort.send(data)
         serialPort.close()
     }
 }

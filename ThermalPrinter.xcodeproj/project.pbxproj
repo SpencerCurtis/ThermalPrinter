@@ -54,7 +54,6 @@
 		462FF5E32299B75100B581A9 /* Printer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Printer.swift; sourceTree = "<group>"; };
 		469CAFD5229AB22C00C8C110 /* macIcon.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = macIcon.jpg; sourceTree = "<group>"; };
 		469CAFD7229AB30500C8C110 /* test.bmp */ = {isa = PBXFileReference; lastKnownFileType = image.bmp; path = test.bmp; sourceTree = "<group>"; };
-		469CAFD9229AB6E900C8C110 /* macIcon.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = macIcon.h; sourceTree = "<group>"; };
 		469CAFDA229AB71200C8C110 /* ThermalPrinter-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "ThermalPrinter-Bridging-Header.h"; sourceTree = "<group>"; };
 		469CAFDB229AB71200C8C110 /* icon.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = icon.h; sourceTree = "<group>"; };
 		469CAFDC229AB71200C8C110 /* icon.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = icon.c; sourceTree = "<group>"; };
@@ -169,7 +168,6 @@
 				46E966822298D10400EFD6DC /* ThermalPrinter.entitlements */,
 				469CAFD5229AB22C00C8C110 /* macIcon.jpg */,
 				469CAFD7229AB30500C8C110 /* test.bmp */,
-				469CAFD9229AB6E900C8C110 /* macIcon.h */,
 				46E966942298D37A00EFD6DC /* ORSSerial.framework */,
 				469CAFDA229AB71200C8C110 /* ThermalPrinter-Bridging-Header.h */,
 				46C663132309BC17000156A3 /* Python-Thermal-Printer-master */,
